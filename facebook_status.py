@@ -18,7 +18,7 @@ def get_user_data():
     data = []
     
     offset = 0
-    statuses = graph.get('me/statuses', {'limit':'100', 'offset':str(offset)})['data']
+    statuses = graph.get_object('me/statuses', limit=100, offset=offset)['data']
     
     while len(statuses) > 0:
         for status in statuses:
@@ -29,7 +29,7 @@ def get_user_data():
                     likes = len(status['likes']['data'])
                 data.append((likes,message))
         offset += 100
-        statuses = graph.get('me/statuses', {'limit':'100', 'offset':str(offset)})['data']
+        statuses = graph.get_object('me/statuses', limit=100, offset=offset)['data']
     return data
 
 def main():
