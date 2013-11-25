@@ -3,9 +3,6 @@ Created on Nov 24, 2013
 
 @author: alex
 '''
-import os
-os.chdir('/Users/alex/Documents/workspace/ai_fb_generator')
-
 import yaml
 import facebook
 
@@ -34,4 +31,10 @@ def get_user_data():
         offset += 100
         statuses = graph.get('me/statuses', {'limit':'100', 'offset':str(offset)})['data']
     return data
+
+def main():
+    print get_user_data()
+    
+if __name__ == '__main__':
+    main()
         
