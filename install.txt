@@ -1,1 +1,5 @@
 pip install facebook-sdk
+pip install facebook-sdk
+
+to get user access token: https://developers.facebook.com/tools/explorer/
+allow 'user_status' in user data permission and 'update_status' in extended permission
