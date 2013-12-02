@@ -13,7 +13,7 @@ from nltk.stem.porter import PorterStemmer
 # each words
 def remove_stems(file):
     new_file = []
-    punctuation = re.compile(r'[-.,"?!:;|0-9]')
+    punctuation = re.compile(r'[-.,"?!:;]')
     stemmer = LancasterStemmer()
     for raw_post in file:
         post = raw_post[1]        
@@ -64,11 +64,10 @@ def process_file(file_name):
         file_minus_stop_words.append((post[0],token))
     return file_minus_stop_words
 
-output = str(process_file('heidi_status'))
-output_name = 'Data/heidi_processed_status.txt'
-f = open(output_name,'w')
-f.write(output)
-f.close()        
 
-
-
+# Need to download stop words first
+# Go to python, and input nltk.download()
+# Download stopwords under corpus
+processed_file = process_file('Data/heidi_status')
+output_name = 'Data/heidi_processed_status.p'
+pickle.dump(processed_file, open(output_name, "wb"))
