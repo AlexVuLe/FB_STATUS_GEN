@@ -1,6 +1,7 @@
 import pickle
 import pandas as pd
 import itertools
+import numpy as np
 
 input_file = 'Data/heidi_processed_status.p'
 
@@ -26,8 +27,9 @@ def calculate_edgeweight(data):
     # generate a dataframe of unique word-pairs, the cumulative number of likes, and the number of statuses that contain each word-pair
     colnames = ['pair', 'word1', 'word2', 'cum_likes', 'count']
     df = pd.DataFrame(columns = colnames)
-
+    i = 0
     for status in data:
+        i+=1
         num_likes  = status[0]
         # all combinations of word-pairs in a given status
         word_pairs = itertools.combinations(status[1], 2)
@@ -40,7 +42,7 @@ def calculate_edgeweight(data):
 
             else:
                 df = df.append(pd.Series([current_pair, current_pair[0], current_pair[1], num_likes, 1], index = colnames), ignore_index = True)
-                
+    print 'total num of statuses:', i
     return df
 
 def build_graph(df):
@@ -52,6 +54,13 @@ def build_graph(df):
         graph_df[edge['word2']][edge['word1']] = edge['avg_likes']
     
     return graph_df
+
+def clustering(graph_df):
+    
+    d_matrix = np.diag(graph_df.sum())
+    w_matrix = graph_df.as_matrix()
+    l_matrix = d_matrix - w_matrix
+    
 
 df = calculate_edgeweight(data)
 df['avg_likes'] = df['cum_likes']/df['count']
