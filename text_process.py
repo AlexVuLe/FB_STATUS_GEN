@@ -84,6 +84,7 @@ def correct_misspelling(word):
         
         # Returns the closest match to the suggestion list using difflib
         suggested_word = difflib.get_close_matches(word, suggestions, 1)
+
         if suggested_word == []: return word
         return suggested_word[0]
 
@@ -92,16 +93,16 @@ def correct_misspelling(word):
 def process_file(file_name):
     file = pickle.load(open(file_name, "rb")) 
     file = remove_stems(file)
-    stop_words = find_stop_words(file,.03,.97)
+    #stop_words = find_stop_words(file,.03,.97)
     file_minus_stop_words = []    
 
     # Removes the words from stop_words and fixes misspellings
     for post in file:
-        token = [word for word in post[1] if word not in stop_words]
+        #token = [word for word in post[1] if word not in stop_words]
 
         # Fixes misspellings
         fixed_token = []
-        for word in token:
+        for word in post[1]:  #token:
             if word not in nltk.corpus.nps_chat.words() and word not in nltk.corpus.words.words():
                 word = correct_misspelling(word)
             fixed_token.append(word)
@@ -111,13 +112,10 @@ def process_file(file_name):
     return file_minus_stop_words
 
 
-
-
 # Need to download stop words first
 # Go to python, and input nltk.download()
 # Download stopwords under corpus
-processed_file = process_file('Data/heidi_status.p')
-output_name = 'Data/heidi_processed_status_misspellings.p'
-
+processed_file = process_file('Data/vu_status.p')
+output_name = 'Data/vu_processed_status_misspellings.p'
 pickle.dump(processed_file, open(output_name, "wb"))
 
