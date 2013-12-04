@@ -111,7 +111,13 @@ def process_file(file_name):
     return file_minus_stop_words
 
 
-processed_file = process_file('Data/heidi_status')
+
+
+# Need to download stop words first
+# Go to python, and input nltk.download()
+# Download stopwords under corpus
+processed_file = process_file('Data/heidi_status.p')
 output_name = 'Data/heidi_processed_status_misspellings.p'
+
 pickle.dump(processed_file, open(output_name, "wb"))
 

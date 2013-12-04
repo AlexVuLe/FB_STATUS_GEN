@@ -12,9 +12,6 @@ class pair:
         self.word1 = word1
         self.word2 = word2
     
-    def to_sorted_list(self):
-        return [self.word1, self.word2].sort()
-
     def __eq__(self, other):
         return (self.word1 == other.word1 and self.word2 == other.word2) or (self.word1 == other.word2 and self.word2 == other.word1)
 
@@ -46,5 +43,16 @@ def calculate_edgeweight(data):
                 
     return df
 
+def build_graph(df):
+    # construct the graph with a dataframe of unique word-pairs and edge-weights
+    words = list(set(df['word1']) | set(df['word2']))
+    graph_df = pd.DataFrame(columns = words, index = words).fillna(0)
+    for row, edge in df.T.iteritems():
+        graph_df[edge['word1']][edge['word2']] = edge['avg_likes']
+        graph_df[edge['word2']][edge['word1']] = edge['avg_likes']
+    
+    return graph_df
+
 df = calculate_edgeweight(data)
 df['avg_likes'] = df['cum_likes']/df['count']
+graph_df = build_graph(df)

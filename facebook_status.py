@@ -5,11 +5,13 @@ Created on Nov 24, 2013
 '''
 import yaml
 import facebook
+import pickle
 
 def get_user_token(file = 'user_access_token.yaml'):
     with open(file, 'r') as file:
         doc = yaml.load(file)
     user_token = doc['token']
+
     return user_token
 
 def get_user_data():
@@ -33,7 +35,9 @@ def get_user_data():
     return data
 
 def main():
+    f = open('Data/heidi_status.p', 'wb')
     print get_user_data()
+    pickle.dump(get_user_data(), f)
     
 if __name__ == '__main__':
     main()
