@@ -2,8 +2,11 @@ import pickle
 import pandas as pd
 import itertools
 import numpy as np
+import scipy.linalg as spl
+from scipy.cluster.vq import kmeans, whiten, vq
+from pylab import plot,show
 
-input_file = 'Data/heidi_processed_status.p'
+input_file = 'Data/vu_processed_status.p'
 
 data = pickle.load(open(input_file, 'rb'))
 
@@ -36,12 +39,16 @@ def calculate_edgeweight(data):
         for word_pair in word_pairs:
             current_pair = [word_pair[0], word_pair[1]]
             current_pair.sort()
-            if word_pair in df['pair']:
-                df['cum_likes'][df['pair'] == word_pair] += num_likes
-                df['count'][df['pair'] == word_pair] += 1
+            current_pair = tuple(current_pair)
+            if current_pair in df['pair'].tolist():
+#                print current_pair
+                df['cum_likes'][df['pair'] == current_pair] += num_likes
+                df['count'][df['pair'] == current_pair] += 1
 
             else:
                 df = df.append(pd.Series([current_pair, current_pair[0], current_pair[1], num_likes, 1], index = colnames), ignore_index = True)
+    df = df[df['cum_likes'] != 0]
+    df = df.dropna()
     print 'total num of statuses:', i
     return df
 
@@ -60,8 +67,16 @@ def clustering(graph_df):
     d_matrix = np.diag(graph_df.sum())
     w_matrix = graph_df.as_matrix()
     l_matrix = d_matrix - w_matrix
-    
+    e_value, e_vector = spl.eig(l_matrix, d_matrix)
+    U = np.matrix(e_vector[0:2]).T
+    centroids, _ = kmeans(U, 2)
+    idx,_ = vq(U,centroids)
+    plot(U[idx==0,0],U[idx==0,1],'ob',
+         U[idx==1,0],U[idx==1,1],'or')
+    show()
+    return idx
 
 df = calculate_edgeweight(data)
 df['avg_likes'] = df['cum_likes']/df['count']
 graph_df = build_graph(df)
+idx = clustering(graph_df)
