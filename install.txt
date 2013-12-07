@@ -1,5 +1,8 @@
 pip install facebook-sdk
-pip install facebook-sdk
 
 to get user access token: https://developers.facebook.com/tools/explorer/
 allow 'user_status' in user data permission and 'update_status' in extended permission
+
+If you are using MacOSX, unzip the pyenchant egg in required_pkgs folder and copy folder enchant to your Python site-packages folder.
+
+First time using nltk, import nltk and run nltk.download() in python console to download all the required packages.
