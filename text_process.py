@@ -1,3 +1,9 @@
+# Input of the program: Two options. Option 1: -s <sentence>. You input a 
+# string sentence and it prints the text processed sentence.
+# Option 2: -d <input file name> <output file name>.
+# Input two strings of file names and it would run text process
+# the file.
+
 # Need to download stop words first
 # Go to python, and input nltk.download()
 # Download 'stopwords', 'chat_words', and 'words' under corpus
@@ -7,10 +13,12 @@
 
 import difflib
 import enchant
+import getopt
 import nltk
 import numpy
 import pickle
 import re
+import sys
 
 from multiprocessing import Pool
 from nltk.corpus import stopwords
@@ -18,7 +26,7 @@ from nltk.probability import FreqDist
 from nltk.stem.lancaster import LancasterStemmer
 from nltk.stem.porter import PorterStemmer
 from nltk.stem.wordnet import WordNetLemmatizer
-from nltk.tokenize import RegexpTokenizer 
+
 
 CHAT_WORDS = nltk.corpus.nps_chat.words() 
 ENGLISH_WORDS = nltk.corpus.words.words()
@@ -106,10 +114,11 @@ def correct_misspelling(word_tuple):
         return word_tuple
 
 # The main method that runs text processing
-def process_file(file_name):
-    file = pickle.load(open(file_name, "rb"))
+def process_file(file, remove_frequent = True):
+
     file = remove_stems(file)
-    stop_words = find_stop_words(file,.05,.97)
+    stop_words = []
+    if remove_frequent: stop_words = find_stop_words(file,.05,.97)
     file_minus_stop_words = []
     pool = Pool(processes=4)
 
@@ -117,21 +126,45 @@ def process_file(file_name):
     for post in file:
         token = [word for word in post[1] if word not in stop_words]
         
-        # Fixes misspellings
+        # Fixes misspellings using a pool creating a new thread for each one
         fixed_token = pool.map(correct_misspelling, token)
-
-
-        file_minus_stop_words.append((post[0],fixed_token))#(post[0],fixed_token))
-
+        file_minus_stop_words.append((post[0],fixed_token))
+        
     return file_minus_stop_words
 
 
 
+# Main method. Two options. Option 1: -s <sentence>. You input a 
+# string sentence and it prints the text processed sentence.
+# Option 2: -d <input file name> <output file name>.
+# Input two strings of file names and it would run text process
+# the file.
+def main(argv):
+    if argv[0] == '-s':
+        if argv[1] == 'default':
+            sentence = 'I smiled, I smile, he smile. Yestereday I killed sombody'
+            print process_file([(0, sentence)], False)
+        else:
+            sentence = argv[1]
+            file = [(0, sentence)]
+            print process_file(file, False)
 
-# Need to download stop words first
-# Go to python, and input nltk.download()
-# Download stopwords under corpus
-processed_file = process_file('Data/heidi_status.p')
-output_name = 'Data/heidi_processed_status_tags.p'
-pickle.dump(processed_file, open(output_name, "wb"))
+    if argv[0] == '-d':
+        if argv[1] == 'default':
+            file = pickle.load(open('Data/heidi_status.p', "rb"))
+            processed_file = process_file(file)
+            output_name = 'Data/heidi_processed_status_tags.p'
+            pickle.dump(processed_file, open(output_name, "wb"))
+        else:
+            file = pickle.load(open(argv[1], "rb"))
+            processed_file = process_file(file)
+            output_name = argv[2]
+            pickle.dump(processed_file, open(output_name, "wb"))
+ 
+    
+
+
+if  __name__ =='__main__':
+    main(sys.argv[1:])
+
 
