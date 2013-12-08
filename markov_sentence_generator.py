@@ -35,7 +35,7 @@ def separate_sentences(s):
     return list_of_s
 
 file = []
-for file_name in ['Data/vu_status.p']:
+for file_name in ['Data/vu_status.p', 'Data/heidi_status.p']:
     file = file + pickle.load(open(file_name, "rb"))
     
 
@@ -72,7 +72,7 @@ while start_double[1] not in ENDINGS:
     start_words = cnt[start_double]
     start_word = random_pick(start_words)
     space = ' '
-    if start_word in ENDINGS:
+    if not start_word[0].isalnum():
         space = ''
     sentence += space + start_word
     start_double = (start_double[1],start_word)
