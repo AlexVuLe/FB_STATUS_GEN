@@ -59,9 +59,13 @@ def build_graph(df):
     for row, edge in df.T.iteritems():
         graph_df[edge['word1']][edge['word2']] = edge['avg_likes']
         graph_df[edge['word2']][edge['word1']] = edge['avg_likes']
-    
+
+    graph_df = graph_df.convert_objects(convert_numeric = True)
+
     return graph_df
 
+
+# Normalized Laplacian
 def clustering(graph_df):
     
     d_matrix = np.diag(graph_df.sum())
@@ -74,9 +78,67 @@ def clustering(graph_df):
     plot(U[idx==0,0],U[idx==0,1],'ob',
          U[idx==1,0],U[idx==1,1],'or')
     show()
-    return idx
+    clusters = graph_df.copy()
+    clusters['cluster'] = idx
+    return clusters
 
 df = calculate_edgeweight(data)
 df['avg_likes'] = df['cum_likes']/df['count']
 graph_df = build_graph(df)
-idx = clustering(graph_df)
+clusters = clustering(graph_df)
+
+
+
+# density based on top 10 weights
+def clustering_max_w(graph_df):
+    num_words = 15
+    max_pair_dict = {}
+    max_likes = pd.Series(index = graph_df.index)
+    for word in graph_df.index:
+        rank_by_likes = graph_df[word].order(ascending = False)
+        max_pair_dict[word] = rank_by_likes[0:num_words]
+        max_likes[word] = sum(rank_by_likes[0:num_words])
+    max_likes = max_likes.order(ascending = False)
+    
+    best_words = []
+    for best_word in max_likes.index[0:num_words]:
+        best_words.append(best_word)
+        best_words.extend(max_pair_dict[best_word].keys())
+    best_words = set(best_words)
+    return best_words
+
+df = calculate_edgeweight(data)
+df['avg_likes'] = df['cum_likes']/df['count']
+graph_df = build_graph(df)
+#clusters = clustering(graph_df)
+clusters = clustering_max_w(graph_df)
+
+
+
+# DBSCAN
+def dbscan_clustering(graph_df):
+    graph_df2 = 22 - graph_df.ix.as_matrix()
+    db = sklearn.cluster.DBSCAN(eps = 20, min_samples = 5).fit(graph_df2)
+    unique_labels = set(labels)
+    colors = plt.cm.Spectral(np.linspace(0, 1, len(unique_labels)))
+    for k, col in zip(unique_labels, colors):
+        if k == -1:
+            # Black used for noise.
+            col = 'k'
+        markersize = 4
+    class_members = [index[0] for index in np.argwhere(labels == k)]
+    cluster_core_samples = [index for index in core_samples
+                            if labels[index] == k]
+    for index in class_members:
+        x = graph_df2[index]
+        if index in core_samples and k != -1:
+            markersize = 10
+        else:
+            markersize = 4
+        plt.plot(x[0], x[1], 'o', markerfacecolor=col,
+                 markeredgecolor='k', markersize=markersize)
+#        plt.xlim(0, 22)
+#       plt.ylim(0, 22)
+
+    plt.title('Estimated number of clusters: %d' % n_clusters_)
+    plt.show()
