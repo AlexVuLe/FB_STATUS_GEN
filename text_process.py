@@ -81,6 +81,9 @@ def correct_misspelling(word):
 
     # Checks first if the word is already correct and if not, fixes it
     if not dict.check(word):
+        # TODO Keep the chat word but check for post type with the correct spelling
+        # TODO: Add the tag for every word 
+        # TODO: Remove top and bottom
         suggestions = dict.suggest(word)
         if suggestions == []: return word
 
