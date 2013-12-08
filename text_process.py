@@ -84,6 +84,7 @@ def correct_misspelling(word):
         # TODO Keep the chat word but check for post type with the correct spelling
         # TODO: Add the tag for every word 
         # TODO: Remove top and bottom
+        # TODO Keep smiley and throw away the rest SMILEY = r"[:;8=][o\-']?[()\[\]/\\\?pPdD*$]+"
         suggestions = dict.suggest(word)
         if suggestions == []: return word
 
