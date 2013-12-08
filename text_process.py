@@ -8,16 +8,26 @@
 import difflib
 import enchant
 import nltk
+import numpy
 import pickle
 import re
 
+from multiprocessing import Pool
 from nltk.corpus import stopwords
 from nltk.probability import FreqDist
 from nltk.stem.lancaster import LancasterStemmer
 from nltk.stem.porter import PorterStemmer
 from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.tokenize import RegexpTokenizer 
 
-# First removes punctuations and numbers. Then removes the list of stop words
+CHAT_WORDS = nltk.corpus.nps_chat.words() 
+ENGLISH_WORDS = nltk.corpus.words.words()
+PWL = enchant.request_pwl_dict('chat_words')
+DICT = enchant.DictWithPWL("en_US", 'chat_words')
+
+
+# First removes punctuations and numbers and adds in a tag for each word.
+# Then removes the list of stop words
 # given from nltk. Then uses the lemmatizer then the Lancaster stemmer in
 # order to get the root of each words. Lemmatizer forms actual words
 # from the word list dictionary so the words it forms are actual words,
@@ -33,19 +43,21 @@ def remove_stems(file):
     for raw_post in file:
         post = raw_post[1]
         token = nltk.word_tokenize(post)
+        token_tags = nltk.pos_tag(token)
+
         new_token = []
-        for word in token:
+        for word in token_tags:
             # Removes punctuations and change it to lower case
-            original_word = punctuation.sub("", word.lower())
+            original_word = punctuation.sub("", word[0].lower())
 
             # Stems each word to their roots, but using lemmatizer then Lancaster
-            word = lemmatizer.lemmatize(original_word)
-            if original_word == word:
-                word = stemmer.stem(word)
+            stemmed_word = lemmatizer.lemmatize(original_word)
+            if original_word == stemmed_word:
+                stemmed_word = stemmer.stem(stemmed_word)
 
             # Removes stopwords that are defined in the nltk library
-            if word not in nltk.corpus.stopwords.words('english') and word != '':
-                new_token.append(word)
+            if stemmed_word not in nltk.corpus.stopwords.words('english') and stemmed_word != '':
+                new_token.append((stemmed_word, word[1]))
 
         new_file.append((raw_post[0], new_token))
     return new_file
@@ -71,58 +83,55 @@ def find_stop_words(file, lower_bound, upper_bound):
 
 # Uses Enchant to correct misspellings. Use the enchant english dictionary
 # and the chat words dictionary as reference.
-def correct_misspelling(word):
-    pwl = enchant.request_pwl_dict(nltk.corpus.nps_chat.words())
-    dict = enchant.DictWithPWL("en_US", 'nltk.corpus.nps_chat.words()')
+def correct_misspelling(word_tuple):
+    word, tag = word_tuple
 
     # Ignores words with symbols/numbers since they are probably not regular words
-    punctuation = re.compile(r'[-~ /#<>|0-9]')
-    if not re.search(punctuation, word) == None: return word
+    SMILEY = r"[:;8=][o\-']?[()\[\]/\\\?pPdD*$]+"
+    PUNCTUATION = re.compile(r'[-~ /#<>|0-9]')
+    if not re.search(SMILEY, word) == None: return word_tuple
+    if not re.search(PUNCTUATION, word) == None: return word_tuple
+
 
     # Checks first if the word is already correct and if not, fixes it
-    if not dict.check(word):
-        # TODO Keep the chat word but check for post type with the correct spelling
-        # TODO: Add the tag for every word 
-        # TODO: Remove top and bottom
-        # TODO Keep smiley and throw away the rest SMILEY = r"[:;8=][o\-']?[()\[\]/\\\?pPdD*$]+"
-        # TODO parallel and have variable for chatword list
-        suggestions = dict.suggest(word)
-        if suggestions == []: return word
+    if not DICT.check(word) and  word not in CHAT_WORDS and word not in ENGLISH_WORDS:
+        suggestions = DICT.suggest(word)
 
         # Returns the closest match to the suggestion list using difflib
         suggested_word = difflib.get_close_matches(word, suggestions, 1)
 
-        if suggested_word == []: return word
-        return suggested_word[0]
-
+        if suggested_word == []: return word_tuple
+        return (suggested_word[0], tag)
+    else: 
+        return word_tuple
 
 # The main method that runs text processing
 def process_file(file_name):
     file = pickle.load(open(file_name, "rb"))
     file = remove_stems(file)
-    #stop_words = find_stop_words(file,.03,.97)
+    stop_words = find_stop_words(file,.05,.97)
     file_minus_stop_words = []
+    pool = Pool(processes=4)
 
     # Removes the words from stop_words and fixes misspellings
     for post in file:
-        #token = [word for word in post[1] if word not in stop_words]
-
+        token = [word for word in post[1] if word not in stop_words]
+        
         # Fixes misspellings
-        fixed_token = []
-        for word in post[1]:  #token:
-            if word not in nltk.corpus.nps_chat.words() and word not in nltk.corpus.words.words():
-                word = correct_misspelling(word)
-            fixed_token.append(word)
+        fixed_token = pool.map(correct_misspelling, token)
 
-        file_minus_stop_words.append((post[0],fixed_token))
+
+        file_minus_stop_words.append((post[0],fixed_token))#(post[0],fixed_token))
 
     return file_minus_stop_words
+
+
 
 
 # Need to download stop words first
 # Go to python, and input nltk.download()
 # Download stopwords under corpus
-processed_file = process_file('Data/vu_status.p')
-output_name = 'Data/vu_processed_status_misspellings.p'
+processed_file = process_file('Data/heidi_status.p')
+output_name = 'Data/heidi_processed_status_tags.p'
 pickle.dump(processed_file, open(output_name, "wb"))
 
