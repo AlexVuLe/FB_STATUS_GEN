@@ -3,3 +3,4 @@
 *.pyc
 *.yaml
 .DS_Store
+Data/Tweets.txt
