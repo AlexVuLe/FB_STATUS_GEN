@@ -3,7 +3,7 @@ DOWNLOADS:
 pip install facebook-sdk
 pip install numpy
 pip install matplotlib
-pip install pandas
+pip install pandas (version <0.10)
 pip Install networkx
 
 to get user access token: https://developers.facebook.com/tools/explorer/
