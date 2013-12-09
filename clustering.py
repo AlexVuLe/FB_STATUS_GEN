@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 
-input_file = 'Data/vu_processed_status_tags.p'
+input_file = 'Data/heidi_processed_status_tags.p'
 data = pickle.load(open(input_file, 'rb'))
 
 def calculate_edgeweight(data):
@@ -54,16 +54,17 @@ def build_graph(df):
     return graph_df
 
 
-# density based on top weights
+# cluster out the group of words contingent to edges of highest weights
 def clustering_max_w(graph_df):
 
-    num_words     = 25 # we will look at words with top num_words 
-    num_neighbors = 10
+    num_words     = 25 # we will look at top num_words words based on average edge weight 
+    num_neighbors = 10 # we will add num_neighbors neighbors of the top words to the cluster
     max_pair_dict = {}
     avg_likes     = pd.Series(index = graph_df.index)
 
     for word in graph_df.index:
         rank_by_likes = graph_df[word].order(ascending = False)
+        # pick num_neighbors neighbors of the word. If the word has fewer than num_neighbors neighbors, pick all of its neighbors
         neighbors = min(num_neighbors, len(rank_by_likes[rank_by_likes.notnull()]))
         max_pair_dict[word] = rank_by_likes[0:neighbors]
         avg_likes[word] = rank_by_likes.mean()
@@ -78,10 +79,12 @@ def clustering_max_w(graph_df):
 
 
 df = calculate_edgeweight(data)
-df['avg_likes'] = df['cum_likes']/df['count']
+# calculate the average number of likes for each word pair
+df['avg_likes'] = df['cum_likes']/df['count'] 
 graph_df = build_graph(df)
 best_words = clustering_max_w(graph_df)
 
+pickle.dump(best_words, open('Data/heidi_best_words.p', 'wb'))
 
 G = nx.Graph()
 for node in best_words:
@@ -97,4 +100,5 @@ nx.draw(G,
         font_color='blue',
         cmap = plt.get_cmap('autumn'), 
         node_color = values)
+#plt.savefig('presentation/vu_top12.png')
 plt.show()
