@@ -27,8 +27,11 @@ def generate_sentence(start_words, cnt):
     sentence = ''
     start_double = random_pick(start_words)
     first_word = start_double[0]
-    first_word = first_word[0].upper() + first_word[1:] 
-    sentence +=  first_word + ' ' + start_double[1] 
+    first_word = first_word[0].upper() + first_word[1:]
+    second_word =  start_double[1]
+    if second_word.isalnum():
+        second_word = ' ' + second_word
+    sentence +=  first_word + second_word  
     while start_double[1] not in ENDINGS:
         start_words = cnt[start_double]
         start_word = random_pick(start_words)
@@ -49,18 +52,20 @@ def filter(wordbank, restricted):
             del wordbank[key]
     return wordbank
 
-markov = pickle.load(open('Data/markov_dict.p', 'rb'))
-start_words = pickle.load(open('Data/start_words.p', 'rb'))
-cluster = pickle.load(open('Data/vu_best_words.p', 'rb'))
-
-markov = filter(markov, cluster)
-
-def find_sentence():
+def find_sentence(start_words, markov):
     while True:
         try:
-            print generate_sentence(start_words, markov)
+            return generate_sentence(start_words, markov)
             break
         except:
             pass
 
-find_sentence()
+def main():
+    markov = pickle.load(open('Data/markov_dict.p', 'rb'))
+    start_words = pickle.load(open('Data/start_words.p', 'rb'))
+    cluster = pickle.load(open('Data/vu_best_words.p', 'rb'))
+    markov = filter(markov, cluster)
+    print find_sentence(start_words, markov)
+    
+if __name__ == '__main__':
+    main()
