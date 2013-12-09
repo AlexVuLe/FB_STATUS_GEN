@@ -26,7 +26,9 @@ def generate_sentence(start_words, cnt):
     '''
     sentence = ''
     start_double = random_pick(start_words)
-    sentence += start_double[0] + ' ' + start_double[1] 
+    first_word = start_double[0]
+    first_word = first_word[0].upper() + first_word[1:] 
+    sentence +=  first_word + ' ' + start_double[1] 
     while start_double[1] not in ENDINGS:
         start_words = cnt[start_double]
         start_word = random_pick(start_words)
