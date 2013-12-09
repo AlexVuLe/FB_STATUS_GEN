@@ -1,12 +1,15 @@
-# Input of the program: Two options. Option 1: -s <sentence>. You input a 
-# string sentence and it prints the text processed sentence.
+# Input of the program: Two options. 
+# Option 1: -s <sentence>. You input a 
+# string sentence and it prints the text processed sentence, or 'default' as
+# the sentence to print a default example
 # Option 2: -d <input file name> <output file name>.
 # Input two strings of file names and it would run text process
-# the file.
+# the file. Or input just 'default' to run default file.
 
 # Need to download stop words first
 # Go to python, and input nltk.download()
-# Download 'stopwords', 'chat_words', and 'words' under corpus
+# Download 'stopwords', 'nps_chat', 'wordnet', and 'words' under corpus.
+# Also download 'maxent_treebank_pos_tagger' under all packages.
 # Also need to download enchant by running 'sudo pip install pyenchant'
 # If you are using MacOS, unzip the pyenchant egg file in the required_pkgs
 # and copy the folder enchant into your Python site-packages folder
@@ -30,7 +33,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 
 CHAT_WORDS = nltk.corpus.nps_chat.words() 
 ENGLISH_WORDS = nltk.corpus.words.words()
-PWL = enchant.request_pwl_dict('chat_words')
+PWL = enchant.request_pwl_dict('CHAT_WORDS')
 DICT = enchant.DictWithPWL("en_US", 'chat_words')
 
 
@@ -113,9 +116,9 @@ def correct_misspelling(word_tuple):
     else: 
         return word_tuple
 
-# The main method that runs text processing
+# The main part that runs text processing. Inputs a file and returns 
+# the processed file
 def process_file(file, remove_frequent = True):
-
     file = remove_stems(file)
     stop_words = []
     if remove_frequent: stop_words = find_stop_words(file,.05,.97)
@@ -142,7 +145,7 @@ def process_file(file, remove_frequent = True):
 def main(argv):
     if argv[0] == '-s':
         if argv[1] == 'default':
-            sentence = 'I smiled, I smile, he smiles. The loving purple cows study all night long'
+            sentence = 'I smiled, I smile, he smiles. The loving purple cows study all night long.'
             print 'input:', sentence
             print 'output:', process_file([(0, sentence)], False)
         else:
@@ -162,8 +165,6 @@ def main(argv):
             output_name = argv[2]
             pickle.dump(processed_file, open(output_name, "wb"))
  
-    
-
 
 if  __name__ =='__main__':
     main(sys.argv[1:])
