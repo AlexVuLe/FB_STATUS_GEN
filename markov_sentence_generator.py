@@ -10,7 +10,7 @@ from collections import Counter
 import random
 
 import os
-os.chdir('/Users/alex/Documents/workspace/ai_fb_generator')
+os.chdir('/Users/alex/Documents/workspace/ai_fb_gen')
 
 ENDINGS = set(['\n', '.', '!', '?'])
 
@@ -28,7 +28,7 @@ def separate_sentences(s):
     return list_of_s
 
 
-def markov_chain(filename, cap=0.3, chunk_size=2048):
+def markov_chain(filename, cap=0.03, chunk_size=2048):
     ''' Read in a dataset of tweets and learn to write sentences '''
     cnt = dict()
     start_words = Counter()
