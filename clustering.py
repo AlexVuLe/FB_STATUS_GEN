@@ -84,8 +84,6 @@ df['avg_likes'] = df['cum_likes']/df['count']
 graph_df = build_graph(df)
 best_words = clustering_max_w(graph_df)
 # the graph with only the words in the clusters
-smaller_graph = graph_df.loc[best_words][list(best_words)]
-
 pickle.dump(best_words, open('Data/heidi_best_words.p', 'wb'))
 
 
@@ -99,7 +97,7 @@ for row, edge in smaller_graph.T.iteritems():
     column in edge[edge.notnull()].index])
 
 for row, edge in smaller_graph.T.iteritems():
-    # networkx cluster outputs clustering coefficients. Since larger
+    # networkx cluster outputs clustering coefficients. we use the reciprocal of the original edge weight because larger number means denser in our context
     G.add_weighted_edges_from([(edge.name, column, 1./edge[column]) for column in edge[edge.notnull()].index])
 values = [nx.clustering(G).values()]
 
