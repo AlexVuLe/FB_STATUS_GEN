@@ -1,0 +1,16 @@
+Vu's Markov Chain
+python markov_dict.py
+
+Nico's Text Processing
+subl user_access_token.yaml
+python text_process.py -s 'default'
+
+Heidi's
+
+
+Combine:
+python
+import sys
+sys.argv = ['vu_best_words.p', 'heidi_best_words.p']
+execfile('random_sentence_generator.py')
+find_sentence(start_words, markov)
