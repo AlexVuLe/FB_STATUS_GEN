@@ -1,15 +1,19 @@
 DOWNLOADS:
 
 pip install facebook-sdk
+pip install numpy
+pip install matplotlib
+pip install pandas
+pip Install networkx
 
 to get user access token: https://developers.facebook.com/tools/explorer/
 allow 'user_status' in user data permission and 'update_status' in extended permission
 
-Need to download enchant to run text processing. Run 'sudo pip install pyenchant' for unix. If you are using MacOSX, unzip the pyenchant egg in required_pkgs folder and copy folder enchant to your Python site-packages folder. 
+Try to run pip install pyenchant
+If it is not working because you are using MacOSX, unzip the pyenchant egg in required_pkgs folder and copy folder enchant to your Python site-packages folder.
 
-First time using nltk, import nltk and run nltk.download() in python console to download all the required packages. Required packages are 'stopwords', 'nps_chat', 'wordnet', and 'words' from corpus and 'maxent_treebank_pos_tagger' from all packages. 
+First time using nltk, import nltk and run nltk.download() in python console to download all the required packages. Required packages are 'stopwords', 'nps_chat', 'wordnet', and 'words' from corpus and 'maxent_treebank_pos_tagger' from all packages.
 
-Need to install Panda version .11
 
 
 
