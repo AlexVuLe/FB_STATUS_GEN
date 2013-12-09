@@ -33,7 +33,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 
 CHAT_WORDS = nltk.corpus.nps_chat.words() 
 ENGLISH_WORDS = nltk.corpus.words.words()
-PWL = enchant.request_pwl_dict('CHAT_WORDS')
+PWL = enchant.request_pwl_dict(CHAT_WORDS)
 DICT = enchant.DictWithPWL("en_US", 'chat_words')
 
 
@@ -145,7 +145,7 @@ def process_file(file, remove_frequent = True):
 def main(argv):
     if argv[0] == '-s':
         if argv[1] == 'default':
-            sentence = 'I smiled, I smile, he smiles. The loving purple cows study all night long.'
+            sentence = 'I smiled, I smile, he smiles. I booked his book. A fly flies flyingly. The loving purplee cows stusdy all night longg. lol, I am sooooooooooooooo happy rofl'
             print 'input:', sentence
             print 'output:', process_file([(0, sentence)], False)
         else:
@@ -160,7 +160,7 @@ def main(argv):
             output_name = 'Data/heidi_processed_status_tags.p'
             pickle.dump(processed_file, open(output_name, "wb"))
         else:
-            file = pickle.load(open(argv[1], "rb"))
+            file = pickle.load(open(argv[1], "rb"))            
             processed_file = process_file(file)
             output_name = argv[2]
             pickle.dump(processed_file, open(output_name, "wb"))
