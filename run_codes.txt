@@ -6,7 +6,7 @@ subl user_access_token.yaml
 python text_process.py -s 'default'
 
 Heidi's
-
+python clustering.py
 
 Combine:
 python
