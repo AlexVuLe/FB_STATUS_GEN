@@ -33,7 +33,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 
 CHAT_WORDS = nltk.corpus.nps_chat.words() 
 ENGLISH_WORDS = nltk.corpus.words.words()
-PWL = enchant.request_pwl_dict(CHAT_WORDS)
+PWL = enchant.request_pwl_dict('CHAT_WORDS')
 DICT = enchant.DictWithPWL("en_US", 'chat_words')
 
 
@@ -123,14 +123,13 @@ def process_file(file, remove_frequent = True):
     stop_words = []
     if remove_frequent: stop_words = find_stop_words(file,.05,.97)
     file_minus_stop_words = []
-    #pool = Pool(processes=4)
+
 
     # Removes the words from stop_words and fixes misspellings
     for post in file:
         token = [word for word in post[1] if word not in stop_words]
         fixed_token = []
         # Fixes misspellings using a pool creating a new thread for each one
-        #fixed_token = pool.map(correct_misspelling, token)
         for word in token:
             fixed_token.append(correct_misspelling(word))
         file_minus_stop_words.append((post[0],fixed_token))
