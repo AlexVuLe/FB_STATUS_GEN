@@ -7,6 +7,13 @@ import random
 from markov_sentence_generator import ENDINGS
 import pickle
 import os
+import nltk as n
+
+from nltk.stem.lancaster import LancasterStemmer
+from nltk.stem.porter import PorterStemmer
+from nltk.stem.wordnet import WordNetLemmatizer
+
+
 os.chdir('/Users/alex/Documents/workspace/ai_fb_gen')
 
 def random_pick(start_words):
@@ -41,12 +48,16 @@ def generate_sentence(start_words, cnt):
         sentence += space + start_word
         start_double = (start_double[1],start_word)
     return sentence
+
+def reduced_form(word):
+    w = WordNetLemmatizer().lemmatize(word) 
+    return w.lower()
     
-def filter(wordbank, restricted):
+def filter_wordbank(wordbank, restricted):
     for key in wordbank.keys():
         w1, w2 = key
         for k_i in wordbank[key].keys():
-            if not restricted.intersection(set([w1, w2, k_i])):
+            if not restricted.intersection(set([reduced_form(word) for word in [w1, w2, k_i]])):
                 del wordbank[key][k_i]
         if len(wordbank[key]) == 0:
             del wordbank[key]
@@ -59,13 +70,11 @@ def find_sentence(start_words, markov):
             break
         except:
             pass
-
-def main():
+    
+if __name__ == '__main__':
     markov = pickle.load(open('Data/markov_dict.p', 'rb'))
     start_words = pickle.load(open('Data/start_words.p', 'rb'))
     cluster = pickle.load(open('Data/vu_best_words.p', 'rb'))
-    markov = filter(markov, cluster)
+    markov = filter_wordbank(markov, cluster)
+    print len(markov)
     print find_sentence(start_words, markov)
-    
-if __name__ == '__main__':
-    main()
