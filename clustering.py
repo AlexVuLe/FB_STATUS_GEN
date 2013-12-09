@@ -77,34 +77,31 @@ def clustering_max_w(graph_df):
     best_words = set(best_words)
     return best_words
 
+if __name__ == '__main__':
+    df = calculate_edgeweight(data)
+    # calculate the average number of likes for each word pair
+    df['avg_likes'] = df['cum_likes']/df['count']
+    graph_df = build_graph(df)
+    best_words = clustering_max_w(graph_df)
+    # the graph with only the words in the clusters
+    pickle.dump(best_words, open('Data/heidi_best_words.p', 'wb'))
 
-df = calculate_edgeweight(data)
-# calculate the average number of likes for each word pair
-df['avg_likes'] = df['cum_likes']/df['count']
-graph_df = build_graph(df)
-best_words = clustering_max_w(graph_df)
-# the graph with only the words in the clusters
-pickle.dump(best_words, open('Data/heidi_best_words.p', 'wb'))
 
+    # Visualization using Networkx
+    G = nx.Graph()
+    for node in best_words:
+        G.add_node(node)
+    smaller_graph = graph_df.ix[list(best_words),list(best_words)]
 
-# Visualization using Networkx
-G = nx.Graph()
-for node in best_words:
-    G.add_node(node)
-smaller_graph = graph_df.ix[list(best_words),list(best_words)]
-for row, edge in smaller_graph.T.iteritems():
-    G.add_weighted_edges_from([(edge.name, column, 1./edge[column]) for
-    column in edge[edge.notnull()].index])
+    for row, edge in smaller_graph.T.iteritems():
+        # networkx cluster outputs clustering coefficients. we use the reciprocal of the original edge weight because larger number means denser in our context
+        G.add_weighted_edges_from([(edge.name, column, 1./edge[column]) for column in edge[edge.notnull()].index])
+    values = [nx.clustering(G).values()]
 
-for row, edge in smaller_graph.T.iteritems():
-    # networkx cluster outputs clustering coefficients. we use the reciprocal of the original edge weight because larger number means denser in our context
-    G.add_weighted_edges_from([(edge.name, column, 1./edge[column]) for column in edge[edge.notnull()].index])
-values = [nx.clustering(G).values()]
-
-nx.draw(G,
-        node_size=1300,
-        font_color='blue',
-        cmap = plt.get_cmap('autumn'),
-        node_color = values)
-#plt.savefig('presentation/vu_top12.png')
-plt.show()
+    nx.draw(G,
+            node_size=1300,
+            font_color='blue',
+            cmap = plt.get_cmap('autumn'),
+            node_color = values)
+    #plt.savefig('presentation/vu_top12.png')
+    plt.show()
