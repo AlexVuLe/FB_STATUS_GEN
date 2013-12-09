@@ -142,8 +142,9 @@ def process_file(file, remove_frequent = True):
 def main(argv):
     if argv[0] == '-s':
         if argv[1] == 'default':
-            sentence = 'I smiled, I smile, he smile. Yestereday I killed sombody'
-            print process_file([(0, sentence)], False)
+            sentence = 'I smiled, I smile, he smiles. The loving purple cows study all night long'
+            print 'input:', sentence
+            print 'output:', process_file([(0, sentence)], False)
         else:
             sentence = argv[1]
             file = [(0, sentence)]
