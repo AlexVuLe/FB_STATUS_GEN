@@ -9,9 +9,6 @@ import nltk as n
 from collections import Counter
 import random
 
-import os
-os.chdir('/Users/alex/Documents/workspace/ai_fb_gen')
-
 ENDINGS = set(['\n', '.', '!', '?'])
 
 def separate_sentences(s):
@@ -26,7 +23,6 @@ def separate_sentences(s):
             initial = i+1
     list_of_s = [s for s in list_of_s if s not in ENDINGS]
     return list_of_s
-
 
 def markov_chain(filename, cap=0.03, chunk_size=2048):
     ''' Read in a dataset of tweets and learn to write sentences '''
@@ -59,12 +55,16 @@ def markov_chain(filename, cap=0.03, chunk_size=2048):
             s = separate_sentences(s)
             for s_i in s:
                 s_i = n.word_tokenize(s_i)
-                if len(s_i) >= 3:
+                
+                # Create a dictionary of word sequences
+                # Key: tuple of two words
+                # Value: dictionary of next possible words and their freq
+                if len(s_i) >= 3: # Only do this when we have more than 3 words in the sentence
                     if s_i[-1] not in ENDINGS:
-                        s_i.append('.')
+                        s_i.append('.') #If the end of sentence has no stop sign, add period.
                     w1 = s_i[0]
                     w2 = s_i[1]
-                    start_words[(w1,w2)] += 1.
+                    start_words[(w1,w2)] += 1. # A dictionary of possible start 2 words
                     for next in s_i[2:]:
                         if (w1,w2) in cnt:
                             next_words = cnt[(w1,w2)] 
@@ -80,7 +80,7 @@ def markov_chain(filename, cap=0.03, chunk_size=2048):
     return start_words, cnt
 
 def main():
-    start_words, cnt = markov_chain('Data/Tweets.txt')
+    start_words, cnt = markov_chain('Data/Tweets.txt') # Train using publicly available Tweets
     pickle.dump(start_words, open( "Data/start_words.p", "wb" ))
     pickle.dump(cnt, open( "Data/markov_dict.p", "wb" ))
 
